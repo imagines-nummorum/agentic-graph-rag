@@ -43,6 +43,7 @@ services:
     volumes:
       - ./app/neo4j/data:/data
       - ./app/neo4j/logs:/logs
+      - ./app/neo4j/import:/import
     environment:
       - NEO4J_AUTH=neo4j/password
       - NEO4J_server_memory_heap_initial__size=512m

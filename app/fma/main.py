@@ -1,8 +1,8 @@
 import os
 import asyncio
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, HTTPException, Depends
-from fastapi import FastAPI, Request
+from typing import Union, List, Annotated
+from fastapi import FastAPI, Response, Request, HTTPException, Depends, Query, HTTPException
 from mcp.server.sse import SseServerTransport
 
 # WICHTIG: Hier importieren wir die Logik
@@ -103,3 +103,17 @@ async def get_graph_schema():
         }
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+@app.get("/data/units/{id}")
+async def get_single_unit(id: str):
+    """
+    Liefert den komplexen Kontext für eine Unit ausgehend von ihrer unit_id.
+    """
+    try:
+        # Wir rufen die komplexe Query aus der database.py auf
+        result = await db.get_unit_by_id(id)
+
+        return Response(content=result, media_type="text/markdown")
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Server Error: {str(e)}")

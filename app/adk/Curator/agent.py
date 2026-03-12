@@ -1,6 +1,7 @@
 import os
 import requests
 import asyncio
+from typing import Union, List, Any
 from google.adk.agents.llm_agent import Agent
 from mcp import ClientSession
 from mcp.client.sse import sse_client
@@ -36,8 +37,19 @@ async def read_graph(query: str) -> str:
     async with sse_client(MCP_SERVER_URL) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
-            # Wir rufen exakt den Namen auf, den wir im mcp_server.py definiert haben
             result = await session.call_tool("read_graph", arguments={"query": query})
+            return result.content[0].text
+
+async def get_unit_by_id(unit_id: Union[int, str]) -> Any:
+    """
+    Ruft den tiefen Kontext für eine oder mehrere Units über den MCP-Server ab.
+    Akzeptiert einzelne Unit-IDs (Int/String) oder Listen davon.
+    """
+
+    async with sse_client(MCP_SERVER_URL) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            result = await session.call_tool("get_unit_by_id", arguments={"id": unit_id})
             return result.content[0].text
 
 # 3. ADK Agent Definition
@@ -49,7 +61,7 @@ root_agent = Agent(
     instruction=(
         "Du bist ein Agent, der via MCP mit einer Neo4j-Instanz verbunden ist."
     ),
-    tools=[explore_mcp_endpoint, read_graph]
+    tools=[explore_mcp_endpoint, read_graph, get_unit_by_id]
 )
 
 if __name__ == "__main__":
