@@ -5,3 +5,7 @@ app/neo4j/data
 app/neo4j/logs
 logs/*
 !logs/.gitkeep
+app/fma/static/img/*
+!app/fma/static/img/.gitkeep
+app/fma/tmp/*
+!app/fma/tmp/.gitkeep

@@ -5,7 +5,6 @@ from ..mcp_registry import mcp_manager
     description="Initiales System-Briefing für den GraphRAG-Agenten"
 )
 async def onboarding_briefing(args):
-    # Du kannst hier sogar dynamisch Infos aus der DB einbauen, falls nötig
     return """
 DU BIST: Ein hochspezialisierter GraphRAG-Experte mit Zugriff auf eine Neo4j-Datenbank.
 

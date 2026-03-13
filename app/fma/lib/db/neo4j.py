@@ -4,8 +4,6 @@ from neo4j import AsyncGraphDatabase
 
 from .tools.validate_read import is_read_only
 from .tools.serialize_records import serialize_records
-from .tools.load_cypher_file import load_cypher_file
-from .tools.reduce_unit_for_llm import reduce_unit_for_llm
 
 #from .queries.get_units import GET_UNITS_BY_ID
 
@@ -62,21 +60,6 @@ class GraphDatabase:
                 
             return output
 
-    async def get_unit_by_id(self, unit_id):
-        """Sucht Unit basierend auf ID."""
-
-        # ensure INTs are handled as such
-        if isinstance(unit_id, str) and unit_id.isdigit():
-            unit_id = int(unit_id)
-        
-        query = load_cypher_file("get_unit_by_id")
-        result = await self.run_statement(query, {"id": unit_id})
-        
-        if not result[0]["data"]:
-            return f"Unit '{unit_id}' not found"
-
-        return reduce_unit_for_llm(result[0]["data"])
-
 db = GraphDatabase()
 
 async def run_statement(query: str, parameters: dict = None):
@@ -84,6 +67,3 @@ async def run_statement(query: str, parameters: dict = None):
 
 async def run_query(query: str, parameters: dict = None):
     return await db.run_query(query, parameters)
-
-async def get_unit_by_id(unit_id):
-    return await db.get_unit_by_id(unit_id)

@@ -17,9 +17,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir \
     fastapi \
     uvicorn \
+    jinja2 \
     "mcp[sse]" \
     neo4j \
-    python-dotenv
+    python-dotenv \
+    Pillow
 
 # Im Dev-Modus lassen wir COPY weg oder nutzen es nur als Fallback, 
 # da wir das Volume über Docker Compose mounten.

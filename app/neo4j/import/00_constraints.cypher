@@ -30,3 +30,7 @@ CREATE CONSTRAINT pattern_group_id_unique IF NOT EXISTS FOR (n:PatternGroup) REQ
 // --- Comparisons ---
 CREATE CONSTRAINT composition_comparison_id_unique IF NOT EXISTS FOR (n:CompositionComparison) REQUIRE n.composition_comparison_id IS UNIQUE;
 CREATE CONSTRAINT composition_parallel_id_unique IF NOT EXISTS FOR (n:CompositionParallel) REQUIRE n.composition_parallel_id IS UNIQUE;
+
+// --- Images ---
+CREATE CONSTRAINT asset_id_unique IF NOT EXISTS FOR (n:Image) REQUIRE n.img_id IS UNIQUE;
+CREATE CONSTRAINT image_src_url_unique IF NOT EXISTS FOR (n:Image) REQUIRE n.src_url IS UNIQUE;

@@ -8,6 +8,7 @@ CREATE
 (gn23)-[:HAS_INTERPRETATION]->(gn32:Interpretation {interpretation_id: 32, slug: "bearded", certainty: 1.0, reasoning_statement: "A beard is clearly observable", timestamp: "2026-02-18", status: "Primary"})-[:IDENTIFIED_AS]->(gn33:Concept:Feature {concept_id: 33, slug: "bearded"}),
 (gn4)-[:HAS_COMPOSITION_FEATURE]->(gn34:CompositionFeature {composition_feature_id: 34, slug: "male"})-[:HAS_INTERPRETATION]->(gn35:Interpretation {interpretation_id: 35, slug: "male", certainty: 1.0, reasoning_statement: "Typical male attribute (beard)", timestamp: "2026-02-18", status: "Primary"})-[:IDENTIFIED_AS]->(gn36:Concept:Feature {concept_id: 36, slug: "male"}),
 (gn17)-[:HAS_EVIDENTIARY_RELATIONSHIP]->(gn31)-[:IS_A]->(gn37:Architectonic:Methodology {architectonic_id: 37, slug: "evidentiary-relationship"})<-[:IS_A]-(gn20),
-(gn28)-[:HAS_Evidentiary_RELATIONSHIP]->(gn20),
+(gn28)-[:HAS_EVIDENTIARY_RELATIONSHIP]->(gn20),
 (gn30)<-[:HAS_SOURCE_REFERENCE]-(gn10)-[:HAS_SOURCE_REFERENCE]->(gn19),
-(gn16)<-[:IMPAIRED_BY]-(gn10)-[:IMPAIRED_BY]->(gn14);
+(gn16)<-[:IMPAIRED_BY]-(gn10)-[:IMPAIRED_BY]->(gn14),
+(gn3)-[:HAS_IMAGE]->(gn38:Image {img_id: 38, slug: "11396-obverse", src_url: "https://data.corpus-nummorum.eu/storage/coins/11396/img/12963/o/thumbnails/lg.jpeg"});

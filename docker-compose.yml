@@ -53,6 +53,8 @@ services:
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true
+      # VectorIndex
+      - NEO4J_dbms_jvm_additional=--add-modules jdk.incubator.vector
 
   fma:
     container_name: idea-agent-fma
@@ -74,6 +76,20 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8002 --reload
     depends_on:
       - neo4j
+
+  embed:
+    container_name: idea-agent-embed
+    restart: no
+    build:
+      context: ./build
+      dockerfile: Dockerfile.embed
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./app/embed:/app/app
+      - ./logs:/logs
+    # Überschreibt den CMD aus dem Dockerfile für Hot-Reloading
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload
 
 networks:
   idea-agent-network:

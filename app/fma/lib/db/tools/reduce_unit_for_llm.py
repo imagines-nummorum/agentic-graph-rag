@@ -84,11 +84,11 @@ def reduce_unit_for_llm(input_text):
     #for pref, label in sorted(alias_to_label.items()):
     #    output.append(f"* {pref} = {label}")
     
-    output.append("\n## Nodes")
+    output.append("\n### Nodes")
     for node in node_registry.values():
         output.append(f"* {node['full_def']}")
     
-    output.append("\n## Relations")
+    output.append("\n### Relations")
     for rel in relations:
         output.append(f"* {rel}")
 

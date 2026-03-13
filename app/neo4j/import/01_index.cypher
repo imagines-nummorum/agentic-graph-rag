@@ -13,3 +13,13 @@ CREATE INDEX comparison_similarity IF NOT EXISTS FOR (n:CompositionComparison) O
 
 // --- Concepts ---
 CREATE INDEX concept_path_lookup IF NOT EXISTS FOR (n:Concept) ON (n.concept_path_ids);
+
+// --- Vector ---
+CREATE VECTOR INDEX image_embeddings_index IF NOT EXISTS
+FOR (i:Image) ON (i.embedding)
+OPTIONS {
+  indexConfig: {
+    `vector.dimensions`: 512,
+    `vector.similarity_function`: 'cosine'
+  }
+}
