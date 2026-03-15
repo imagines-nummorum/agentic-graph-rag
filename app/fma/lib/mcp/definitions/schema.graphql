@@ -4,6 +4,12 @@ Physical or virtual Carrier of one or more Compositions
 type Unit { # Sublabels: :Coin
   unit_id: Int!
   slug: String!
+  src_url: String # original source of dataset
+  nomisma_mint: String # (:Coin)
+  nomisma_material: String # (:Coin)
+  nomisma_denomination: String # (:Coin)
+  year_min: Int  # (:Coin) - neg. values vor BC
+  year_max: Int  # (:Coin) - neg. values vor BC
   
   compositions: [Composition!]! @relationship(type: "HAS_COMPOSITION", direction: OUT)
 }

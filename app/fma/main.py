@@ -22,6 +22,8 @@ from .lib.db.get_unit_by_id import get_unit_by_id
 from .lib.db.get_similar_units_by_image import get_similar_units_by_image
 from .lib.db.get_similar_units_by_url import get_similar_units_by_url
 
+from .lib.services.get_latest_image import get_latest_image
+
 # Der SSE-Transport braucht den Pfad zum Nachrichten-Endpunkt
 sse = SseServerTransport("/mcp/messages")
 
@@ -166,3 +168,8 @@ async def stage_image(file: UploadFile = File(...)):
         "filename": file.filename, 
         "message": "Image staged"
     }
+
+@app.get("/latest-image/")
+async def show_latest_image():
+    string = get_latest_image()
+    return Response(content=string, media_type="text/plaintext")

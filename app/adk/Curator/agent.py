@@ -78,7 +78,6 @@ async def get_similar_units_by_asset_id(asset_id: str) -> str:
     async with sse_client(MCP_SERVER_URL) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
-            # Hier rufen wir das MCP-Tool auf und übergeben NUR den winzigen String
             result = await session.call_tool("get_similar_units_by_asset_id", arguments={"asset_id": asset_id})
             return result.content[0].text
 
@@ -90,8 +89,17 @@ async def get_similar_units_by_image_url(image_url: str) -> str:
     async with sse_client(MCP_SERVER_URL) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
-            # Hier rufen wir das MCP-Tool auf und übergeben NUR den winzigen String
             result = await session.call_tool("get_similar_units_by_image_url", arguments={"image_url": image_url})
+            return result.content[0].text
+
+async def get_similar_units_by_image() -> str:
+    """
+    Ruft den tiefen epistemischen Kontext für ein bereitgestelltes Bild ab.
+    """
+    async with sse_client(MCP_SERVER_URL) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            result = await session.call_tool("get_similar_units_by_image")
             return result.content[0].text
 
 # 3. ADK Agent Definition
@@ -102,12 +110,21 @@ root_agent = Agent(
     description="An Expert Agent for Reasoning based on GraphRAG.",
     instruction=(
         "Du bist ein hochspezialisiertes, multimodales Expert Agent AI-System für visuelle und epistemische Analysen."
-        "\nRufe zu Beginn einer Session IMMER zuerst mit dem Tool `get_onboarding_prompt` das initiale Onboarding vom MCP auf."
+        "\nRufe zu Beginn einer Session IMMER und ausnahmslos das initiale Onboarding mit dem Tool `get_onboarding_prompt` auf. Es hilft dir bei der folgenden Unterhaltung."
+        "\nSie hilfreich: als Experte darfs du nicht leichtfertig urteilen, sondern musst deine Antworten sorgfältig abwägen. Du bist hilfreich, wenn du den User über alle Unsicherheiten und Ambivalenzen aufklärst und dich in Zurückhaltung übst."
         "\nDu BIST in der Lage, Bilder direkt zu sehen und visuell zu analysieren. Leugne niemals deine Fähigkeit, Bilder zu analysieren."
-        "\nDu kannst über MCP auf einen Knowledge Graph zugreifen."
-        "\nWenn dir der User ein Bild und eine Image-URL zur Analyse übergibt, verwendest du das Tool 'get_similar_units_by_image_url'. Analysiere das Bild immer morphologisch selbst, aber verwende die Beschreibungen der ähnlichen Bilder als Orientierung für die Deutung. Beachte den Ähnlichkeitsscore, der Bildinhalt wird selten identisch sein."
+        "\nDu kannst über MCP auf einen Neo4j Knowledge Graph zugreifen."
+        "\nZWINGENDES Vorgehen, wenn dir der User ein Bild zur Analyse übergibt:"
+        "\n* Sofern zu Beginn der Session noch nicht geschehen, rufe das Tool `get_onboarding_prompt` auf"
+        "\n* Verwende als erstes das Tool 'get_similar_units_by_image': Der Endpoint wird dir Bildbeschreibungen zu *visuell ähnlichen* Bildern zurückgeben (sofern vorhanden)"
+        "\n* Führe eine morphologische Analyse durch, vermeide spekulative semantische Deutungen, sondern bleib auf der visuellen Ebene"
+        "\n* Verwende die ermittelten Beschreibungen, um deine Analyse zu verfeinern"
+        "\n* Bereite die Graphbasierte Beschreibung für den User natürlichsprachlich auf, um einen angenehmen Lesefluss zu erzeugen. Orientiere dich dabei am Sprachgebrauch eines entsprechenden Fachwissenschaftlers"
+        "\n* Beachte, dass der Graph noch sehr limitiert und das Embedding-Model nicht feinabgestimmt ist (selbst ein sehr hoher Ähnlichkeitsscore > 0.95 kann trügen)"
+        "\n* Gewichte deine eigene morphologische Analyse immer höher als das Vergleichsmaterial und prüfe sorgfältig mögliche Parallelen."
+        "\n* Weise den User daraufhin, dass visuelle Ähnlichkeit nicht deckungsgleich mit semantischer Ähnlichkeit ist, falls du Zweifel am Fitting hast."
     ),
-    tools=[get_onboarding_prompt, explore_mcp_endpoint, read_graph, get_unit_by_id, get_similar_units_by_image_url]
+    tools=[get_onboarding_prompt, explore_mcp_endpoint, read_graph, get_unit_by_id, get_similar_units_by_image]
 )
 
 if __name__ == "__main__":
