@@ -1,0 +1,35 @@
+{
+    "creators": [
+        {
+            "name": "Köster, Jan",
+            "orcid": "0000-0002-1825-0097",
+            "affiliation": "Berlin-Brandenburg Academy of Sciences and Humanities",
+            "type": "ProjectMember"
+        }
+    ],
+    "contributors": [
+        {
+            "name": "Berlin-Brandenburg Academy of Sciences and Humanities",
+            "type": "HostingInstitution"
+        }
+    ],
+    "title": "GraphRAG-Driven Agentic Reasoning: A Research Prototype using ADK, MCP, and Neo4j",
+    "version": "0.1.0",
+    "access_right": "open",
+    "keywords": [
+        "Graph Database", 
+        "Digital Humanities", 
+        "Epistemology", 
+        "Iconography", 
+        "Neo4j", 
+        "Numismatics",
+        "ADK",
+        "MCP"
+    ],
+    "license": "Apache-2.0",
+    "upload_type": "software",
+    "language": "eng",
+    "communities": [
+        {"identifier": "digitalhumanities"}
+    ]
+}

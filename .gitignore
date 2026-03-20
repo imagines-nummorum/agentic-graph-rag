@@ -1,4 +1,5 @@
 .env
+repomix-output.xml
 **/__pycache__/
 **/.adk/
 app/neo4j/data

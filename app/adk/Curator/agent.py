@@ -3,11 +3,13 @@ import requests
 import asyncio
 from typing import Optional, Dict, Union, List, Any
 from google.adk.agents.llm_agent import Agent
+from google.adk.planners import BuiltInPlanner
+from google.genai import types
 from mcp import ClientSession
 from mcp.client.sse import sse_client
 import base64
 
-MCP_SERVER_URL = "http://fma:8002/mcp/sse"#"http://idea-agent-mcp:8001/sse"
+MCP_SERVER_URL = "http://fma:8001/mcp/sse"
 
 async def explore_mcp_endpoint():
     """
@@ -58,10 +60,10 @@ async def read_graph(query: str) -> str:
             result = await session.call_tool("read_graph", arguments={"query": query})
             return result.content[0].text
 
-async def get_unit_by_id(unit_id: Union[int, str]) -> Any:
+async def get_unit_by_id(unit_id: int) -> Any:
     """
     Ruft den tiefen Kontext für eine oder mehrere Units über den MCP-Server ab.
-    Akzeptiert einzelne Unit-IDs (Int/String) oder Listen davon.
+    Akzeptiert einzelne Unit-IDs (Int) oder Listen davon.
     """
 
     async with sse_client(MCP_SERVER_URL) as (read, write):
@@ -105,13 +107,20 @@ async def get_similar_units_by_image() -> str:
 # 3. ADK Agent Definition
 # Wir erstellen einen Agenten, der später die MCP-Tools nutzen soll.
 root_agent = Agent(
-    model="gemini-2.5-flash",
+    model="gemini-3.1-flash-lite-preview", # gemini-2.5-flash
+    planner=BuiltInPlanner(
+        thinking_config=types.ThinkingConfig(
+            include_thoughts=True,
+            thinking_budget=2048  # Optional: Legt das Limit für die Denk-Tokens fest
+        )
+    ),
     name="Curator",
     description="An Expert Agent for Reasoning based on GraphRAG.",
     instruction=(
         "Du bist ein hochspezialisiertes, multimodales Expert Agent AI-System für visuelle und epistemische Analysen."
-        "\nRufe zu Beginn einer Session IMMER und ausnahmslos das initiale Onboarding mit dem Tool `get_onboarding_prompt` auf. Es hilft dir bei der folgenden Unterhaltung."
-        "\nSie hilfreich: als Experte darfs du nicht leichtfertig urteilen, sondern musst deine Antworten sorgfältig abwägen. Du bist hilfreich, wenn du den User über alle Unsicherheiten und Ambivalenzen aufklärst und dich in Zurückhaltung übst."
+        "\nWICHTIG: Rufe zu Beginn einer Session IMMER das initiale Onboarding mit dem Tool `get_onboarding_prompt` auf. Es hilft dir bei der folgenden Unterhaltung."
+        "\nWICHTIG: Kommuniziere IMMER auf Englisch mit dem User"
+        "\nSei hilfreich: als Experte darfs du nicht leichtfertig urteilen, sondern musst deine Antworten sorgfältig abwägen. Du bist hilfreich, wenn du den User über alle Unsicherheiten und Ambivalenzen aufklärst und dich in Zurückhaltung übst."
         "\nDu BIST in der Lage, Bilder direkt zu sehen und visuell zu analysieren. Leugne niemals deine Fähigkeit, Bilder zu analysieren."
         "\nDu kannst über MCP auf einen Neo4j Knowledge Graph zugreifen."
         "\nZWINGENDES Vorgehen, wenn dir der User ein Bild zur Analyse übergibt:"

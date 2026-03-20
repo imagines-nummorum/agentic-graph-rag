@@ -26,6 +26,7 @@ WITH a, collect(DISTINCT ancestor.architectonic_id) AS all_ancestor_ids
 SET a.architectonic_path_ids = all_ancestor_ids;
 
 //----------------------------------------------------------------------
+// Do the same for the slug (but ignore current node)
 
 MATCH (c:Concept)
 MATCH (c)-[:IS_A*1..]->(ancestor:Concept)

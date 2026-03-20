@@ -6,7 +6,7 @@ from .neo4j import db
 from .tools.load_cypher_file import load_cypher_file
 from .get_unit_by_id import get_unit_by_id
 
-EMBEDDING_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://embed:8003/embed-image/")
+EMBEDDING_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://embed:8002/embed-image/")
 driver = AsyncGraphDatabase.driver(os.getenv("NEO4J_URI"), auth=(os.getenv("NEO4J_USER"), os.getenv("NEO4J_PASSWORD")))
 
 async def generate_embedding(image_bytes: bytes, filename: str = "image.jpg") -> list[float]:

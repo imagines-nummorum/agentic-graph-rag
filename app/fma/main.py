@@ -3,20 +3,19 @@ import uuid
 import asyncio
 from contextlib import asynccontextmanager
 from typing import Union, List, Annotated
-
+# FastAPI and MCP
 from fastapi import FastAPI, Response, Request, HTTPException, Depends, Query, HTTPException, UploadFile, File
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
 from mcp.server.sse import SseServerTransport
 
-# WICHTIG: Hier importieren wir die Logik
+# MCP Server and Tools
 from .lib.mcp.mcp_server import mcp_server
-from .lib.db.neo4j import db
-
 from .lib.mcp.tools.prompts import onboarding_briefing
 
+# DB and DB functions
+from .lib.db.neo4j import db
 from .lib.db.get_graph_schema import get_graph_schema
 from .lib.db.get_ontology import get_ontology
 from .lib.db.get_units_and_images import get_units_and_images
@@ -24,21 +23,20 @@ from .lib.db.get_unit_by_id import get_unit_by_id
 from .lib.db.get_similar_units_by_image import get_similar_units_by_image
 from .lib.db.get_similar_units_by_url import get_similar_units_by_url
 
-from .lib.services.get_latest_image import get_latest_image
 
-# Der SSE-Transport braucht den Pfad zum Nachrichten-Endpunkt
-sse = SseServerTransport("/mcp/messages")
-
+# --- DB Initializing ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    db.connect() # Neo4j Start
+    db.connect()
     yield
-    await db.close() # Neo4j Stop
-
-# Das ist die FastAPI-App
+    await db.close()
+    
 app = FastAPI(title="GraphRAG API", lifespan=lifespan)
 
-# --- MCP ---
+
+# --- MCP ASGI APP ---
+sse = SseServerTransport("/mcp/messages")
+
 async def mcp_asgi_app(scope, receive, send):
     if scope["type"] != "http":
         return
@@ -68,11 +66,11 @@ async def mcp_asgi_app(scope, receive, send):
         })
         await send({"type": "http.response.body", "body": b"MCP Path Not Found"})
 
-# Mounten: Alles unter /mcp geht an unsere Bridge
+# MCP ASGI APP - Mount
 app.mount("/mcp", mcp_asgi_app)
 
-# --- Static / HTML ---
 
+# --- Static / HTML ---
 app.mount("/static", StaticFiles(directory="/app/app/static"), name="static")
 templates = Jinja2Templates(directory="/app/app/templates")
 
@@ -84,7 +82,6 @@ async def favicon():
 async def show_catalogue(request: Request):
     data = await get_units_and_images()
     
-    # Daten an das Template übergeben
     return templates.TemplateResponse(
         "catalogue.html", 
         {"request": request, "units": data}
@@ -161,7 +158,7 @@ async def find_similar_units_by_file(file: UploadFile = File(...)):
 @app.post("/find/similar-units-by-url/")
 async def find_similar_units_by_url(url: str):
     """
-    Shows the 3 most similar image descriptions matching the provided url.
+    Shows the most similar image descriptions matching the provided url.
     """
     result = await get_similar_units_by_url(url)
     
@@ -173,7 +170,7 @@ os.makedirs(STAGING_DIR, exist_ok=True)
 @app.post("/stage-image/")
 async def stage_image(file: UploadFile = File(...)):
     """
-    Nimmt ein Bild entgegen, speichert es kurzzeitig und gibt eine Asset-ID für das MCP zurück.
+    Stages the uploaded image and returns an asset id.
     """
     # Generiere eine eindeutige ID
     asset_id = str(uuid.uuid4())
@@ -186,12 +183,8 @@ async def stage_image(file: UploadFile = File(...)):
         buffer.write(await file.read())
         
     return {
+        "success": True,
         "asset_id": asset_id, 
         "filename": file.filename, 
         "message": "Image staged"
     }
-
-@app.get("/latest-image/")
-async def show_latest_image():
-    string = get_latest_image()
-    return Response(content=string, media_type="text/plaintext")

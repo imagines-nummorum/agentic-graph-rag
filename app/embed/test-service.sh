@@ -2,7 +2,7 @@
 
 # --- Konfiguration ---
 # Passe den Port an, falls dein Container auf einem anderen Port lauscht
-API_URL="http://localhost:8003/embed-image/"
+API_URL="http://localhost:8002/embed-image/"
 IMAGE_PATH=$1
 
 # 1. Prüfen, ob ein Argument übergeben wurde

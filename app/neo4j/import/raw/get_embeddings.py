@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 INPUT_CYPHER = "../99_data.cypher"
 OUTPUT_CYPHER = "../99b_embeddings.cypher"
 IMAGE_DIR = "../../../fma/static/img"
-EMBEDDING_API = "http://localhost:8003/embed-image/"
+EMBEDDING_API = "http://localhost:8002/embed-image/"
 
 
 def extract_image_data(filepath: str) -> list[dict]:
