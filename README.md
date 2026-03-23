@@ -1,13 +1,18 @@
+<p align="center">
+  <img src="assets/in-idea-agent-logo.svg" alt="Logo showing a minimalist robot, head with two eyes, body showing the Letters I D E A as an amalgam" width="150">
+</p>
+
+
 # GraphRAG-Driven Agentic Reasoning: A Research Prototype using ADK, MCP, and Neo4j
 **Case Study: Ancient Numismatics & the IN.IDEA Model**
 
 ## Features & Capabilities
 
 This prototype transforms a static Knowledge Graph into an interactive chat partner. Key capabilities include:
-* **Agentic Graph Traversal:** The agent generates ad-hoc Cypher queries to navigate complex archaeological relationships without hardcoded paths.
-* **Epistemic Reasoning:** Instead of just returning "facts," the system retrieves interpreted data, including scholarly certainty scores and evidence chains.
-* **Multimodal Analysis:** Combines CLIP-based visual similarity with LLM-driven morphological analysis to identify and describe ancient artifacts.
-* **Context-Aware Onboarding:** An MCP-driven onboarding process that dynamically injects the current graph ontology into the agent's context.
+* **Agentic Graph Traversal:** The agent generates ad-hoc Cypher queries to navigate complex relationships without hardcoded paths.
+* **Epistemic Reasoning:** Instead of just returning "facts," the system retrieves interpreted data, including scholarly confidence scores and evidence chains.
+* **Multimodal Analysis:** Combines CLIP-based visual similarity with LLM-driven morphological analysis to identify and describe compositions.
+* **Context-Aware Onboarding:** An MCP-driven onboarding process that injects the current graph ontology into the agent's context.
 * **Efficiency-First Architecture:** Designed to interact with small-scale models (e.g., **Gemini 3.1 Flash Light Preview** with *Thinking: LOW*, or even *MINIMUM*). No expensive flagship models are required for this kind of reasoning - only high-quality, structured data (which is, admittedly, the hardest part to obtain).
 * **Token-Optimized Communication:** Unlike many traditional RAG systems that flood the context window with verbose JSON, this system uses **"topological" Markdown** for detailed graph outputs (unit details) and **GraphQL schema definitions**. This drastically reduces token consumption while maintaining perfect legibility for the LLM.
 
@@ -16,8 +21,8 @@ This prototype transforms a static Knowledge Graph into an interactive chat part
 
 The system consists of four main components orchestrated via Docker:
 
-* ***Neo4j Database**: Stores the multi-layered Knowledge Graph and handles vector-based similarity searches for coin images.
-* ***FMA (Fast Model Adapter): FastAPI + MCP**: The core logic, providing a REST API via FastAPI and a **MCP Server** (Model Context Protocol)
+* **Neo4j Database**: Stores the multi-layered Knowledge Graph and handles vector-based similarity searches for coin images.
+* **FMA (Fast Model Adapter): FastAPI + MCP**: The core logic, providing a REST API via FastAPI and a **MCP Server** (Model Context Protocol)
 * **FastAPI + Sentence Transformers**: A dedicated REST Endpoint using CLIP to generate 512-dimensional image vectors.
 * **ADK**: A multimodal agent built with the Google Agent Development Kit (ADK) that uses Gemini models to reason over the graph data and ADK web for the UI.
 
@@ -72,6 +77,12 @@ This project is a **Proof of Concept (PoC)** demonstrating the integration of th
     * *Note:* In a production environment, a read-only database user would be mandatory (as a minimum). This is currently not implemented due to limitations in the Neo4j Community Edition.
 * **Resource Exhaustion:** There is no query validation or timeout management. A complex, recursive Cypher query could potentially lock the database or exhaust system resources (you will easily encounter this if you force the agent to do so)
 
+### Scalability & Context Window Management
+* **Missing Aggregation Logic:** The prototype currently lacks a strategy for handling large result sets. If a graph query (via `read_graph`) returns dozens or hundreds of units, the resulting payload will inevitably bloat or overflow the LLM's context window (although the unit details are already reduced in terms of token consumption). 
+* **The "Context Ceiling":** To make this system usable with real-world data volumes, intermediate reasoning steps or "Map-Reduce" style architectures are required. 
+    * *Future Solution:* Implementing pre-aggregated summaries, hierarchical retrieval (e.g., first summarizing clusters of units), or a "ranking" layer that selects only the top-N most relevant units for the final reasoning step.
+* **Optimization vs. Volume:** The current implementation is optimized for **high-depth precision** on a small scale, not for **high-volume breadth**.
+
 ### Computer Vision & Embedding Methodology
 * **CLIP Unsuitability:** The utilized CLIP model is **methodologically unsuitable** for ancient numismatics. Due to the specific materiality, stylistic heterogeneity, and semantic ambiguity of ancient coins, two iconographically identical but differently corroded or photographed coins may result in widely divergent vectors (vice versa).
 * **The "Glass Box" Problem:** Relying solely on embeddings for similarity violates the intended "Glass Box" principle of explainable AI. While a morphological analysis via LLM could generate structured queries to support the visual similarity search, this would lead to excessive noise in large-scale datasets (>100k units).
@@ -96,17 +107,11 @@ This project is a **Proof of Concept (PoC)** demonstrating the integration of th
 ## Hands-on: Setup & Installation
 
 > [!TIP]
-> **Can't run it locally?** I have documented the workflow—complete with screenshots and agent reasoning chains—on my **[Blog](https://resonism.substack.com/p/real-reasoning)**.
+> **Can't run it locally?** I have documented the workflow—complete with screenshots and agent reasoning chains **[here](https://resonism.substack.com/p/real-reasoning)**.
 
 ### Prerequisites
-* Docker & Docker Compose.
+* Docker
 * **Google AI Studio API Key**: You can obtain one for free in the [Google AI Studio](https://aistudio.google.com/) (please note the limitations of the free Tier).
-
-### Environment Configuration
-Create a `.env` file in the root directory:
-```
-GOOGLE_API_KEY=your_key_here
-```
 
 ### Port Mapping Warning
 > [!CAUTION]
@@ -114,6 +119,12 @@ GOOGLE_API_KEY=your_key_here
 > * **Neo4j:** `7474` (HTTP), `7687` (Bolt)
 > * **App Services:** `8000` (ADK web), `8001` (FMA/MCP) and `8002` (Embed Service) 
 > * **More flexible setup:** a more flexible version, allowing port configuration via `.env` is planned
+
+### Environment Configuration
+Create a `.env` file in the root directory:
+```
+GOOGLE_API_KEY=your_key_here
+```
 
 ### Deployment
 1.  **Start the containers:** (might require sudo)
@@ -135,14 +146,15 @@ GOOGLE_API_KEY=your_key_here
     * **Neo4j Browser:** `http://localhost:7474` (Credentials: `neo4j/password`)
 
 ### Headless Setup
-The MCP can, of course, be used by **any** agent, meaning the ADK container is not strictly required. In this case, however, the agent must be prepared accordingly, as onboarding alone might not suffice for the desired functionality. Furthermore, `get_similar_units_by_image()` works exclusively with the provided ADK and the Curator agent. Other agents can use the staging mechanism and obtain an asset id, though this has not yet been tested. See [tools directory](app/fma/lib/mcp/tools) for available MCP tools or let your agent explore the MCP endpoint itself.
+The MCP can, of course, be used by **any** agent, meaning the ADK container is not strictly required. In this case, however, the agent must be prepared accordingly, as onboarding alone might not suffice for the desired functionality. Furthermore, `get_similar_units_by_image()` works exclusively with the provided ADK and the *[Curator](app/adk/Curator/agent.py)* agent. Other agents can use the staging mechanism and obtain an asset id, though this has not yet been tested. See [tools directory](app/fma/lib/mcp/tools) for available MCP tools or let your agent explore the MCP endpoint itself.
 
 ### Guided Tour: Testing the Prototype
 To experience the full potential of the GraphRAG setup, we recommend the following workflow:
 
 1.  **Initialize the Agent:** Open the ADK web interface at `http://localhost:8000`. Start by greeting the agent and asking about its functions. 
     * *Technical Note:* The agent is instructed to trigger `get_onboarding_prompt` immediately to load the graph schema. However, the agent might occasionally skip the "introduction" and jump straight to work.
-2.  **Spatiotemporal Queries:** Ask a specific research question, such as: *"Which coins in the database were minted before 1 BC?"* * Watch the logs to see the agent utilize the `read_graph` tool to write and execute a Cypher query on the fly.
+2.  **Spatiotemporal Queries:** Ask a specific research question, such as: *"Which coins in the database were minted before 1 BC?"* 
+    * Watch the logs to see the agent utilize the `read_graph` tool to write and execute a Cypher query on the fly.
 3.  **Deep Dive:** Once a result is found, ask for details. The agent will use `get_unit_by_id` to synthesize the full epistemic context (citations, weight, material, and interpretations).
 4.  **Visual Analysis:** Upload a test image (e.g., **[CN Coin 6900](https://data.corpus-nummorum.eu/storage/coins/6900/img/7957/o/thumbnails/lg.jpeg)**). The agent will use `get_similar_units_by_image`. 
     * *Note:* The agent is trained to prioritize a **morphological analysis** first. The CLIP-retrieved visual parallels serve as a reference, not an absolute truth. Given the limitations of general-purpose CLIP models for numismatics, the agent will (and should) treat these results with scientific skepticism.
@@ -154,6 +166,20 @@ The **Curator Agent** has access to specialized tools via MCP:
 * `read_graph`: Perform raw Cypher queries against the read-only graph.
 * `get_unit_by_id`: Fetches the full epistemic context (interpretations, citations, evidence) for a specific coin.
 * `get_similar_units_by_image`: Uses the current session's image to find visual parallels in the database.
+
+
+## Model Experience
+During development, we evaluated two different models to find the sweet spot between logical precision (Cypher) and qualitative synthesis (Numismatic analysis).
+
+* **Gemini 2.5 Flash:**
+  * **Pro:** Excellent at generating ad-hoc Cypher queries on the fly. Very reliable for structured data retrieval.
+  * **Con:** The linguistic style was somewhat "stiff" and "robotic." It occasionally struggled with deep, qualitative interpretations of the graph, remaining on a more superficial level of analysis.
+* **Gemini 3.1 Flash Light Preview:**
+  * **Pro:** Even more cost-effective than its predecessors. It produces significantly more cohesive, "human-like," and stylistically pleasing summaries.
+  * **Con:** It can be slightly over-ambitious with Cypher queries. It occasionally adds too many constraints to a query, which can lead to empty result sets if not carefully prompted.
+
+> [!IMPORTANT]
+> The current system prompts are in a continuous state of optimization. While functional, they are not yet fully "hardened".
 
 
 ## Author & Governance
@@ -174,3 +200,22 @@ The AI's contribution included the following areas:
 * **Drafting Support:** Generating initial outlines and structural sketches
 
 **Note on Authorship:** While the AI provided support as described above, all final decisions, code implementations, and text formulations were curated, verified, and finalized by the maintainer mentioned above. The AI acted solely as an assistive tool, not as an autonomous agent/co-author.
+
+## Disclaimer & Responsibility
+
+> [!WARNING]
+> **Monitor your API Usage:** Please keep a close eye on your Google AI Studio / Vertex AI API statistics and costs while using the Curator Agent. 
+> * **Token Consumption:** Theoretical malfunctions, logic loops, or unforeseen recursive queries could lead to high token loads. 
+> * **No Warranty:** This is a **technical demonstration** and a research prototype, not a consumer-ready application. 
+> * **Usage Risk:** Any use of this software, including the consumption of paid API credits, is strictly at your own risk. No warranties or guarantees of any kind are provided.
+
+## Open Source & Contribution
+
+**Feel free to fork, modify, and repurpose this codebase!**  
+We explicitly encourage the research community and fellow developers to adapt this Software pattern for their own domains.
+
+While this specific prototype will remain a PoC for the foreseeable future, we are actively preparing the full integration of the **IN.IDEA Graph Framework** into our long-term research services.
+
+Your feedback is highly welcome! We are currently in a phase where the architecture is still agile and easy to adapt. If you have suggestions for technical improvements, architectural refinements, or ideas on how to adapt the framework for other research domains, please do not hesitate to share them.
+
+Please use the **[IN.IDEA Repository](https://github.com/imagines-nummorum/idea-graph-framework)** for any conceptual feedback.
