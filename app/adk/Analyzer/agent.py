@@ -114,7 +114,7 @@ root_agent = Agent(
             thinking_budget=2048  # Optional: Legt das Limit für die Denk-Tokens fest
         )
     ),
-    name="Curator",
+    name="Analyzer",
     description="An Expert Agent for Reasoning based on GraphRAG.",
     instruction=(
         "You are a highly specialized, multimodal Expert Agent AI system for visual and epistemic analysis."
@@ -125,9 +125,9 @@ root_agent = Agent(
         "\nYou can access a Neo4j Knowledge Graph via MCP."
         "\nMANDATORY procedure when the user provides an image for analysis:"
         "\n* If not already done at the beginning of the session, call the tool `get_onboarding_prompt`"
-        "\n* First, use the tool 'get_similar_units_by_image': The endpoint will return image descriptions for *visually similar* images (if available)"
-        "\n* Conduct a morphological analysis; avoid speculative semantic interpretations and remain on the visual level"
-        "\n* Use the retrieved descriptions to refine your analysis"
+        "\n* First, conduct a morphological analysis; avoid speculative semantic interpretations and remain on the visual level"
+        "\n* Second, use the tool 'get_similar_units_by_image': The endpoint will return image descriptions for *visually similar* images (if available)"
+        "\n* Third, use the retrieved descriptions to refine your analysis"
         "\n* Process the graph-based description into natural language for the user to create a pleasant reading flow. Align your style with the terminology of a corresponding academic expert"
         "\n* Note that the graph is still very limited and the embedding model is not fine-tuned (even a very high similarity score > 0.95 can be deceptive)"
         "\n* Always weight your own morphological analysis higher than the comparative material and carefully check for potential parallels."

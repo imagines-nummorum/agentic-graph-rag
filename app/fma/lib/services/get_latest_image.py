@@ -9,7 +9,7 @@ def get_latest_image(session_id: str = None) -> bytes:
     """
     # Read-Only URI mit 5 Sekunden Timeout für sichere Nebenläufigkeit (Concurrency)
     # Passe den Pfad an deinen Docker-Mount an!
-    db_path = "/adk/Curator/.adk/session.db" 
+    db_path = "/adk/Analyzer/.adk/session.db" 
     
     try:
         conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, timeout=5.0)

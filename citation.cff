@@ -6,8 +6,8 @@ authors:
     affiliation: "Berlin-Brandenburg Academy of Sciences and Humanities"
     orcid: "https://orcid.org/0000-0002-1825-0097"
 title: "GraphRAG-Driven Agentic Reasoning: A Research Prototype using ADK, MCP, and Neo4j"
-version: 0.1.0
-date-released: 2026-03-23
+version: 0.1.1
+date-released: 2026-03-25
 license: Apache-2.0
 repository-code: "https://github.com/imagines-nummorum/agentic-reasoning"
 keywords:
