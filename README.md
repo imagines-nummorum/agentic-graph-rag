@@ -200,7 +200,7 @@ It is coordinated by the [Union of German Academies of Sciences and Humanities](
   month        = mar,
   year         = {2026},
   publisher    = {Zenodo},
-  version      = {v0.1.0},
+  version      = {v0.1.1},
   doi          = {10.5281/zenodo.19183341},
   url          = {https://doi.org/10.5281/zenodo.19183341}
 }
